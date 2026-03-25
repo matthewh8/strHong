@@ -35,16 +35,15 @@ const SUPPLEMENTS = [
 
 const BOTTLE_PRESETS = [24, 32, 40];
 
-const STEP_TITLES = ['About You', 'Your Stats', 'Activity', 'Supplements', 'Your Bottle'];
+const STEP_TITLES = ['About You', 'Activity', 'Supplements', 'Your Bottle'];
 const STEP_SUBTITLES = [
-  "Let's personalize your experience.",
-  'Used to calculate your water goal.',
+  'Used to calculate your daily water goal.',
   'How active are you?',
   'Track what you take daily.',
   'Configure your go-to vessel.',
 ];
 
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 4;
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -70,19 +69,6 @@ export default function OnboardingPage() {
   const [bottlePreset, setBottlePreset] = useState<number>(32);
   const [customBottle, setCustomBottle] = useState<string>('');
   const [unit, setUnit] = useState<Unit>('oz');
-
-  // When gender changes, update height/weight defaults
-  useEffect(() => {
-    if (gender === 'female') {
-      setHeightFt(5);
-      setHeightIn(3);
-      setWeight(125);
-    } else {
-      setHeightFt(5);
-      setHeightIn(9);
-      setWeight(165);
-    }
-  }, [gender]);
 
   const bottleSizeOz = customBottle ? parseFloat(customBottle) : bottlePreset;
 
@@ -151,9 +137,10 @@ export default function OnboardingPage() {
             exit={{ opacity: 0, x: -40 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           >
-            {step === 0 && <StepGender gender={gender} onChange={setGender} />}
-            {step === 1 && (
-              <StepStats
+            {step === 0 && (
+              <StepAboutYou
+                gender={gender}
+                onGenderChange={setGender}
                 age={age}
                 heightFt={heightFt}
                 heightIn={heightIn}
@@ -161,20 +148,20 @@ export default function OnboardingPage() {
                 onAgeChange={setAge}
                 onHeightFtChange={setHeightFt}
                 onHeightInChange={setHeightIn}
-                onWeightChange={(v) => setWeight(v)}
+                onWeightChange={setWeight}
               />
             )}
-            {step === 2 && (
+            {step === 1 && (
               <StepActivity
                 level={activityLevel}
                 onChange={setActivityLevel}
                 onInfoOpen={() => setShowActivityInfo(true)}
               />
             )}
-            {step === 3 && (
+            {step === 2 && (
               <StepSupplements supplements={supplements} onChange={setSupplements} />
             )}
-            {step === 4 && (
+            {step === 3 && (
               <StepBottle
                 preset={bottlePreset}
                 onPresetChange={(p) => { setBottlePreset(p); setCustomBottle(''); }}
@@ -278,51 +265,13 @@ export default function OnboardingPage() {
   );
 }
 
-// ─── Step 0: Gender ───────────────────────────────────────────────────────────
-function StepGender({ gender, onChange }: { gender: Gender; onChange: (g: Gender) => void }) {
-  const options: { value: Gender; emoji: string; label: string }[] = [
-    { value: 'male', emoji: '♂', label: 'Male' },
-    { value: 'female', emoji: '♀', label: 'Female' },
-  ];
-  return (
-    <div className="flex flex-col gap-3 pb-4">
-      {options.map((opt) => (
-        <motion.button
-          key={opt.value}
-          onClick={() => onChange(opt.value)}
-          whileTap={{ scale: 0.97 }}
-          className="w-full py-5 rounded-2xl flex items-center gap-4 px-6"
-          style={{
-            background: gender === opt.value ? 'rgba(0,150,255,0.12)' : '#1e293b',
-            border: `2px solid ${gender === opt.value ? '#0096FF' : 'transparent'}`,
-          }}
-        >
-          <span className="text-2xl">{opt.emoji}</span>
-          <span
-            className="text-lg font-semibold"
-            style={{ color: gender === opt.value ? '#0096FF' : '#f1f5f9' }}
-          >
-            {opt.label}
-          </span>
-          {gender === opt.value && (
-            <div
-              className="ml-auto w-5 h-5 rounded-full flex items-center justify-center"
-              style={{ background: '#0096FF' }}
-            >
-              <Check size={12} color="white" strokeWidth={3} />
-            </div>
-          )}
-        </motion.button>
-      ))}
-    </div>
-  );
-}
-
-// ─── Step 1: Physical Stats with collapsible pickers ─────────────────────────
-function StepStats({
+// ─── Step 0: About You (gender + stats on one page) ──────────────────────────
+function StepAboutYou({
+  gender, onGenderChange,
   age, heightFt, heightIn, weight,
   onAgeChange, onHeightFtChange, onHeightInChange, onWeightChange,
 }: {
+  gender: Gender; onGenderChange: (g: Gender) => void;
   age: number; heightFt: number; heightIn: number; weight: number;
   onAgeChange: (v: number) => void;
   onHeightFtChange: (v: number) => void;
@@ -332,7 +281,6 @@ function StepStats({
   const [activeField, setActiveField] = useState<'age' | 'height' | 'weight' | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // Click outside → collapse
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
@@ -347,8 +295,38 @@ function StepStats({
     setActiveField((prev) => (prev === field ? null : field));
   };
 
+  const genderOptions: { value: Gender; emoji: string; label: string }[] = [
+    { value: 'male', emoji: '♂', label: 'Male' },
+    { value: 'female', emoji: '♀', label: 'Female' },
+  ];
+
   return (
     <div ref={wrapperRef} className="flex flex-col gap-3 pb-4">
+      {/* Gender */}
+      <div className="flex gap-3">
+        {genderOptions.map((opt) => (
+          <motion.button
+            key={opt.value}
+            onClick={() => onGenderChange(opt.value)}
+            whileTap={{ scale: 0.97 }}
+            className="flex-1 py-4 rounded-2xl flex items-center justify-center gap-2"
+            style={{
+              background: gender === opt.value ? 'rgba(0,150,255,0.12)' : '#1e293b',
+              border: `2px solid ${gender === opt.value ? '#0096FF' : 'transparent'}`,
+            }}
+          >
+            <span className="text-lg">{opt.emoji}</span>
+            <span className="text-base font-semibold" style={{ color: gender === opt.value ? '#0096FF' : '#f1f5f9' }}>
+              {opt.label}
+            </span>
+            {gender === opt.value && (
+              <div className="w-4 h-4 rounded-full flex items-center justify-center ml-1" style={{ background: '#0096FF' }}>
+                <Check size={10} color="white" strokeWidth={3} />
+              </div>
+            )}
+          </motion.button>
+        ))}
+      </div>
       {/* Age row */}
       <div
         className="rounded-2xl overflow-hidden"
@@ -519,7 +497,7 @@ function StepStats({
   );
 }
 
-// ─── Step 2: Activity Level with pill thermometer ─────────────────────────────
+// ─── Step 1: Activity Level with pill thermometer ─────────────────────────────
 const THERMO_HEIGHT = 240;
 const SEGMENT_HEIGHT = THERMO_HEIGHT / 6;
 
