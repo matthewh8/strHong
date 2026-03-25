@@ -25,6 +25,8 @@ body {
   height: 100svh;
   max-height: 100svh;
   overflow: hidden;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
   background: var(--color-background);
   color: var(--color-text);
   font-family: var(--font-sans), system-ui, sans-serif;
@@ -41,4 +43,9 @@ body {
 ::-webkit-scrollbar {
   width: 0;
   background: transparent;
+}
+
+/* Safe-area bottom padding utility */
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom), 8px);
 }

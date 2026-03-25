@@ -3,14 +3,14 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, HelpCircle, X, Check, ChevronDown } from 'lucide-react';
-import { saveProfile, setOnboardingComplete } from '@/lib/storage';
-import { calcDailyGoal } from '@/lib/calculations';
+import { saveProfile, setOnboardingComplete, saveProfileToSupabase } from '@/lib/storage';
+import { calcDailyGoal, ageFromBirthday } from '@/lib/calculations';
+import { getUser, signOut } from '@/lib/auth';
 import DrumRoller from '@/components/ui/DrumRoller';
 
 type Gender = 'male' | 'female';
 type Unit = 'oz' | 'ml';
 
-const AGES = Array.from({ length: 88 }, (_, i) => i + 13); // 13–100
 const FEET = [3, 4, 5, 6, 7];
 const INCHES = Array.from({ length: 12 }, (_, i) => i); // 0–11
 const WEIGHTS = Array.from({ length: 321 }, (_, i) => i + 80); // 80–400 lbs
@@ -54,7 +54,7 @@ export default function OnboardingPage() {
   const [gender, setGender] = useState<Gender>('male');
 
   // Step 1 – Stats
-  const [age, setAge] = useState<number>(21);
+  const [birthday, setBirthday] = useState<string>('2000-01-01');
   const [heightFt, setHeightFt] = useState<number>(5);
   const [heightIn, setHeightIn] = useState<number>(9);
   const [weight, setWeight] = useState<number>(165);
@@ -72,12 +72,13 @@ export default function OnboardingPage() {
 
   const bottleSizeOz = customBottle ? parseFloat(customBottle) : bottlePreset;
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step < TOTAL_STEPS - 1) {
       setStep((s) => s + 1);
     } else {
-      saveProfile({
-        age,
+      const age = ageFromBirthday(birthday);
+      const profile = {
+        birthday,
         heightFt,
         heightIn,
         weight,
@@ -87,8 +88,14 @@ export default function OnboardingPage() {
         bottleSize: bottleSizeOz || 32,
         unit,
         dailyGoal: calcDailyGoal(weight, activityLevel, supplements, age),
-      });
+      };
+      saveProfile(profile);
       setOnboardingComplete();
+      // Persist to Supabase if logged in
+      const user = await getUser();
+      if (user) {
+        await saveProfileToSupabase(user.id, profile);
+      }
       router.replace('/hydration');
     }
   };
@@ -103,7 +110,14 @@ export default function OnboardingPage() {
       style={{ background: '#0f172a' }}
     >
       {/* Header */}
-      <div className="pt-14 pb-8 flex flex-col items-center">
+      <div className="pt-14 pb-8 flex flex-col items-center relative">
+        <button
+          onClick={async () => { await signOut(); router.replace('/login'); }}
+          className="absolute top-0 right-0 text-xs px-3 py-1.5 rounded-lg"
+          style={{ color: '#475569', background: '#1e293b' }}
+        >
+          Sign out
+        </button>
         <h1 className="text-2xl font-bold" style={{ color: '#f1f5f9' }}>
           {STEP_TITLES[step]}
         </h1>
@@ -141,11 +155,11 @@ export default function OnboardingPage() {
               <StepAboutYou
                 gender={gender}
                 onGenderChange={setGender}
-                age={age}
+                birthday={birthday}
                 heightFt={heightFt}
                 heightIn={heightIn}
                 weight={weight}
-                onAgeChange={setAge}
+                onBirthdayChange={setBirthday}
                 onHeightFtChange={setHeightFt}
                 onHeightInChange={setHeightIn}
                 onWeightChange={setWeight}
@@ -268,17 +282,17 @@ export default function OnboardingPage() {
 // ─── Step 0: About You (gender + stats on one page) ──────────────────────────
 function StepAboutYou({
   gender, onGenderChange,
-  age, heightFt, heightIn, weight,
-  onAgeChange, onHeightFtChange, onHeightInChange, onWeightChange,
+  birthday, heightFt, heightIn, weight,
+  onBirthdayChange, onHeightFtChange, onHeightInChange, onWeightChange,
 }: {
   gender: Gender; onGenderChange: (g: Gender) => void;
-  age: number; heightFt: number; heightIn: number; weight: number;
-  onAgeChange: (v: number) => void;
+  birthday: string; heightFt: number; heightIn: number; weight: number;
+  onBirthdayChange: (v: string) => void;
   onHeightFtChange: (v: number) => void;
   onHeightInChange: (v: number) => void;
   onWeightChange: (v: number) => void;
 }) {
-  const [activeField, setActiveField] = useState<'age' | 'height' | 'weight' | null>(null);
+  const [activeField, setActiveField] = useState<'birthday' | 'height' | 'weight' | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -291,7 +305,7 @@ function StepAboutYou({
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const toggle = (field: 'age' | 'height' | 'weight') => {
+  const toggle = (field: 'birthday' | 'height' | 'weight') => {
     setActiveField((prev) => (prev === field ? null : field));
   };
 
@@ -327,25 +341,24 @@ function StepAboutYou({
           </motion.button>
         ))}
       </div>
-      {/* Age row */}
+      {/* Birthday row */}
       <div
         className="rounded-2xl overflow-hidden"
         style={{ background: '#1e293b' }}
       >
-        {/* Header tap target */}
         <button
-          onClick={() => toggle('age')}
+          onClick={() => toggle('birthday')}
           className="w-full flex items-center justify-between px-5 py-4"
         >
           <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: '#475569' }}>
-            Age
+            Birthday
           </span>
           <div className="flex items-center gap-3">
             <span className="text-base font-bold" style={{ color: '#f1f5f9' }}>
-              {age} yrs
+              {new Date(birthday + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
             </span>
             <motion.div
-              animate={{ rotate: activeField === 'age' ? 180 : 0 }}
+              animate={{ rotate: activeField === 'birthday' ? 180 : 0 }}
               transition={{ duration: 0.2 }}
             >
               <ChevronDown size={16} color="#475569" />
@@ -353,9 +366,8 @@ function StepAboutYou({
           </div>
         </button>
 
-        {/* Expanded picker */}
         <AnimatePresence>
-          {activeField === 'age' && (
+          {activeField === 'birthday' && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
@@ -363,8 +375,20 @@ function StepAboutYou({
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               style={{ overflow: 'hidden' }}
             >
-              <div className="px-4 pb-3">
-                <DrumRoller items={AGES} value={age} onChange={(v) => onAgeChange(v as number)} />
+              <div className="px-5 pb-3">
+                <input
+                  type="date"
+                  value={birthday}
+                  max={new Date().toISOString().split('T')[0]}
+                  onChange={(e) => onBirthdayChange(e.target.value)}
+                  className="w-full rounded-xl px-4 py-3 text-base font-semibold outline-none"
+                  style={{
+                    background: '#263347',
+                    color: '#f1f5f9',
+                    colorScheme: 'dark',
+                    border: 'none',
+                  }}
+                />
               </div>
               <div className="flex justify-end px-4 pb-3">
                 <button
@@ -498,7 +522,7 @@ function StepAboutYou({
 }
 
 // ─── Step 1: Activity Level with pill thermometer ─────────────────────────────
-const THERMO_HEIGHT = 240;
+const THERMO_HEIGHT = 288;
 const SEGMENT_HEIGHT = THERMO_HEIGHT / 6;
 
 function StepActivity({
@@ -589,14 +613,14 @@ function StepActivity({
         </div>
 
         {/* Level buttons */}
-        <div className="flex-1 flex flex-col gap-2">
+        <div className="flex-1 flex flex-col gap-1" style={{ height: THERMO_HEIGHT }}>
           {[...ACTIVITY_LEVELS].reverse().map((lvl) => (
             <motion.button
               key={lvl.score}
               onClick={() => onChange(lvl.score)}
               whileTap={{ scale: 0.97 }}
-              className="w-full py-3 px-4 rounded-xl text-left"
-              style={{
+              className="w-full px-4 rounded-xl text-left"
+              style={{ flex: 1,
                 background:
                   level === lvl.score
                     ? `rgba(${hexToRgb(THERMO_COLORS[lvl.score - 1])}, 0.15)`

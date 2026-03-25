@@ -36,6 +36,16 @@ export function formatDate(date: Date): string {
   return date.toISOString().split('T')[0];
 }
 
+/** Derive age (years) from a YYYY-MM-DD birthday string */
+export function ageFromBirthday(birthday: string): number {
+  const today = new Date();
+  const dob = new Date(birthday);
+  let age = today.getFullYear() - dob.getFullYear();
+  const m = today.getMonth() - dob.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+  return age;
+}
+
 /** Format a timestamp to HH:MM AM/PM */
 export function formatTime(timestamp: number): string {
   return new Date(timestamp).toLocaleTimeString([], {

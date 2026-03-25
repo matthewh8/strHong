@@ -1,8 +1,10 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { isFirstTimeUser, getProfile } from '@/lib/storage';
+import { getProfile } from '@/lib/storage';
 import { useHydration } from '@/hooks/useHydration';
+import { useAuth } from '@/hooks/useAuth';
+import { useNotifications } from '@/hooks/useNotifications';
 import { formatDate } from '@/lib/calculations';
 import RunnaCalendar from '@/components/hydration/RunnaCalendar';
 import TotalDisplay from '@/components/hydration/TotalDisplay';
@@ -11,10 +13,12 @@ import ConsumptionLog from '@/components/hydration/ConsumptionLog';
 
 export default function HydrationPage() {
   const router = useRouter();
+  const { user, loading } = useAuth();
   const [profile, setProfile] = useState<ReturnType<typeof getProfile>>(null);
   const [calendarData, setCalendarData] = useState<Record<string, number>>({});
   const [confirmModal, setConfirmModal] = useState(false);
   const [pendingAmount, setPendingAmount] = useState<number | null>(null);
+  const [showNotifBanner, setShowNotifBanner] = useState(false);
 
   const {
     today,
@@ -29,23 +33,32 @@ export default function HydrationPage() {
     handleDeleteLog,
     handleDateChange,
     getDailyTotals,
-  } = useHydration();
+  } = useHydration(user?.id);
 
   const dailyGoal = profile?.dailyGoal ?? 64;
   const bottleSize = profile?.bottleSize ?? 24;
   const isCurrentDay = selectedDate === today;
+
+  const { requestPermission } = useNotifications(total, dailyGoal);
 
   // Load profile client-side only (avoids SSR/client hydration mismatch)
   useEffect(() => {
     setProfile(getProfile());
   }, []);
 
-  // Redirect to onboarding if needed
+  // Show notification banner if permission not yet decided
   useEffect(() => {
-    if (isFirstTimeUser()) {
-      router.replace('/onboarding');
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      setShowNotifBanner(Notification.permission === 'default');
     }
-  }, [router]);
+  }, []);
+
+  // Redirect to login if not authenticated (wait for session to load first)
+  useEffect(() => {
+    if (!loading && user === null) {
+      router.replace('/login');
+    }
+  }, [user, loading, router]);
 
   // Load calendar data on mount
   useEffect(() => {
@@ -85,8 +98,41 @@ export default function HydrationPage() {
     }
   };
 
+  const handleAllowNotifications = async () => {
+    const perm = await requestPermission();
+    if (perm !== 'default') setShowNotifBanner(false);
+  };
+
   return (
     <div className="flex flex-col" style={{ background: '#0f172a' }}>
+      {/* Notification permission banner */}
+      {showNotifBanner && (
+        <div
+          className="flex items-center justify-between px-4 py-3 mx-4 mt-3 rounded-2xl"
+          style={{ background: '#1e293b' }}
+        >
+          <span className="text-sm" style={{ color: '#94a3b8' }}>
+            Enable reminders to stay on track
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleAllowNotifications}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold"
+              style={{ background: '#0096FF', color: 'white' }}
+            >
+              Allow
+            </button>
+            <button
+              onClick={() => setShowNotifBanner(false)}
+              className="text-xs"
+              style={{ color: '#475569' }}
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Calendar */}
       <RunnaCalendar
         selectedDate={selectedDate}

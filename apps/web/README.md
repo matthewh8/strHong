@@ -1,36 +1,27 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# strHONG
 
-## Getting Started
+A personal hydration tracking app that helps you hit your daily water goal, built as a mobile-first progressive web app.
 
-First, run the development server:
+## What it does
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+**Track water intake** — Log how much water you drink throughout the day with one tap. Add 1 oz, 16 oz, or a full bottle in seconds.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**Smart daily goal** — Your goal is calculated from your body weight, height, age, activity level, and any supplements you take (like creatine). It updates automatically when your stats change.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**History & streaks** — Scroll back through any past day on the calendar. An 8-week heatmap on your profile shows your consistency over time.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Onboarding** — A short setup flow collects your stats and preferences so your goal is personalised from day one.
 
-## Learn More
+## Features
 
-To learn more about Next.js, take a look at the following resources:
+- Log water in custom amounts with undo/redo support
+- Daily goal adapts to your body stats and activity level
+- Weekly calendar to view and edit any past day
+- 8-week hydration heatmap on the profile page
+- Browser notifications to keep you on track throughout the day
+- Works across devices — data syncs to your account
+- Sign in with Google, email magic link, or continue as a guest
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Account
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Your profile stores your health stats (age, height, weight, activity level) and hydration settings (daily goal, bottle size, preferred unit). Everything syncs to your account so switching devices keeps your full history intact.
