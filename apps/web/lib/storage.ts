@@ -1,8 +1,11 @@
 export interface UserProfile {
   age: number;
-  height: number;
+  heightFt: number;
+  heightIn: number;
   weight: number;
   gender: 'male' | 'female' | 'other';
+  activityLevel: number; // 1–6
+  supplements: string[];
   bottleSize: number; // oz
   unit: 'oz' | 'ml';
   dailyGoal: number; // oz
@@ -25,4 +28,9 @@ export function isFirstTimeUser(): boolean {
 
 export function setOnboardingComplete(): void {
   localStorage.setItem('isFirstTimeUser', 'false');
+}
+
+export function clearProfile(): void {
+  localStorage.removeItem('hydro_user_profile');
+  localStorage.removeItem('isFirstTimeUser');
 }

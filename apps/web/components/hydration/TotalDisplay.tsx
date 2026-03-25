@@ -62,7 +62,7 @@ export default function TotalDisplay({ total, dailyGoal, canUndo, canRedo, onUnd
       <div className="mt-4 w-48 h-1.5 rounded-full" style={{ background: '#1e293b' }}>
         <motion.div
           className="h-full rounded-full"
-          style={{ background: '#3b82f6' }}
+          style={{ background: '#0096FF' }}
           initial={{ width: 0 }}
           animate={{ width: `${pct}%` }}
           transition={{ type: 'spring', stiffness: 120, damping: 20 }}

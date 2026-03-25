@@ -11,7 +11,7 @@ import ConsumptionLog from '@/components/hydration/ConsumptionLog';
 
 export default function HydrationPage() {
   const router = useRouter();
-  const profile = getProfile();
+  const [profile, setProfile] = useState<ReturnType<typeof getProfile>>(null);
   const [calendarData, setCalendarData] = useState<Record<string, number>>({});
   const [confirmModal, setConfirmModal] = useState(false);
   const [pendingAmount, setPendingAmount] = useState<number | null>(null);
@@ -34,6 +34,11 @@ export default function HydrationPage() {
   const dailyGoal = profile?.dailyGoal ?? 64;
   const bottleSize = profile?.bottleSize ?? 24;
   const isCurrentDay = selectedDate === today;
+
+  // Load profile client-side only (avoids SSR/client hydration mismatch)
+  useEffect(() => {
+    setProfile(getProfile());
+  }, []);
 
   // Redirect to onboarding if needed
   useEffect(() => {
@@ -81,7 +86,7 @@ export default function HydrationPage() {
   };
 
   return (
-    <div className="flex flex-col h-full" style={{ background: '#0f172a' }}>
+    <div className="flex flex-col" style={{ background: '#0f172a' }}>
       {/* Calendar */}
       <RunnaCalendar
         selectedDate={selectedDate}
@@ -112,6 +117,15 @@ export default function HydrationPage() {
         onIncrement={handleActionTap}
         onPastDayTap={handlePastDayTap}
       />
+
+      {/* History divider */}
+      <div className="flex items-center gap-3 px-4 pt-6 pb-2">
+        <div className="flex-1 h-px" style={{ background: 'rgba(51, 65, 85, 0.5)' }} />
+        <span className="text-xs font-medium uppercase tracking-widest" style={{ color: '#334155' }}>
+          History
+        </span>
+        <div className="flex-1 h-px" style={{ background: 'rgba(51, 65, 85, 0.5)' }} />
+      </div>
 
       {/* Log */}
       <ConsumptionLog logs={logs} onDelete={handleDeleteLog} />
@@ -145,7 +159,7 @@ export default function HydrationPage() {
               <button
                 onClick={handleConfirmEdit}
                 className="flex-1 py-3 rounded-xl text-sm font-medium"
-                style={{ background: '#3b82f6', color: 'white' }}
+                style={{ background: '#0096FF', color: 'white' }}
               >
                 Continue
               </button>

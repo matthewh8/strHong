@@ -1,6 +1,24 @@
-/** Daily water goal in oz: weight (lbs) × 0.5 */
-export function calcDailyGoal(weightLbs: number): number {
-  return Math.round(weightLbs * 0.5);
+const ACTIVITY_MULTIPLIERS = [1.0, 1.2, 1.4, 1.55, 1.7, 1.85];
+
+function ageMultiplier(age: number): number {
+  if (age < 18) return 0.9;
+  if (age < 55) return 1.0;
+  if (age < 70) return 1.1;
+  return 1.15;
+}
+
+/** Daily water goal in oz, adjusted for weight, activity level (1–6), supplements, and age */
+export function calcDailyGoal(
+  weightLbs: number,
+  activityLevel = 1,
+  supplements: string[] = [],
+  age = 25
+): number {
+  const base = weightLbs * 0.5;
+  const actMultiplier = ACTIVITY_MULTIPLIERS[activityLevel - 1] ?? 1.0;
+  const ageMult = ageMultiplier(age);
+  const creatineBonus = supplements.includes('creatine') ? 16 : 0;
+  return Math.round(base * actMultiplier * ageMult + creatineBonus);
 }
 
 /** Convert oz to ml */

@@ -12,7 +12,7 @@ interface Props {
 function LogEntry({ log, onDelete }: { log: HydroLog; onDelete: (id: number) => void }) {
   const x = useMotionValue(0);
   const deleteOpacity = useTransform(x, [-80, -40], [1, 0]);
-  const background = useTransform(x, [-80, 0], ['rgba(239,68,68,0.2)', 'transparent']);
+  const background = useTransform(x, [-80, 0], ['rgba(239,68,68,0.2)', 'rgba(239,68,68,0)']);
 
   const handleDragEnd = () => {
     if (x.get() < -60) {
@@ -61,7 +61,7 @@ function LogEntry({ log, onDelete }: { log: HydroLog; onDelete: (id: number) => 
 
 export default function ConsumptionLog({ logs, onDelete }: Props) {
   return (
-    <div className="flex-1 overflow-y-auto px-4 pt-4 pb-2 scrollable">
+    <div className="px-4 pt-2 pb-6">
       {logs.length === 0 ? (
         <p className="text-center text-sm mt-6" style={{ color: '#334155' }}>
           No entries yet. Tap a circle to log water.

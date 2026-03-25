@@ -19,3 +19,7 @@ export class HydroDb extends Dexie {
 }
 
 export const db = new HydroDb();
+
+export async function clearAllLogs(): Promise<void> {
+  await db.logs.clear();
+}

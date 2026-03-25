@@ -37,7 +37,11 @@ export default function ProfilePage() {
   const handleSave = () => {
     if (!profile) return;
     const weightNum = parseFloat(weight);
-    const updated = { ...profile, weight: weightNum, dailyGoal: calcDailyGoal(weightNum) };
+    const updated = {
+      ...profile,
+      weight: weightNum,
+      dailyGoal: calcDailyGoal(weightNum, profile.activityLevel, profile.supplements, profile.age),
+    };
     saveProfile(updated);
     setProfile(updated);
     setEditing(false);
@@ -47,7 +51,7 @@ export default function ProfilePage() {
 
   const stats = [
     { label: 'Age', value: `${profile.age} yrs` },
-    { label: 'Height', value: `${profile.height} in` },
+    { label: 'Height', value: `${profile.heightFt}'${profile.heightIn}"` },
     { label: 'Weight', value: `${profile.weight} lbs` },
     { label: 'Daily Goal', value: `${profile.dailyGoal} oz` },
   ];
