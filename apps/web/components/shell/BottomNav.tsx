@@ -22,7 +22,7 @@ export default function BottomNav() {
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
         borderTop: '1px solid rgba(51, 65, 85, 0.5)',
-        height: '64px',
+        height: '80px',
       }}
     >
       {tabs.map((tab, i) => {
@@ -31,7 +31,7 @@ export default function BottomNav() {
           const Icon = tab.icon!;
           return (
             <span key={i} className="flex flex-col items-center justify-center w-14 h-14" style={{ opacity: 0.25, cursor: 'not-allowed' }}>
-              <Icon size={22} strokeWidth={1.5} color="#94a3b8" />
+              <Icon size={24} strokeWidth={1.5} color="#94a3b8" />
             </span>
           );
         }
@@ -46,7 +46,7 @@ export default function BottomNav() {
             className="flex flex-col items-center justify-center w-14 h-14"
           >
             <Icon
-              size={22}
+              size={24}
               strokeWidth={isSelected ? 2.5 : 1.5}
               color={isSelected ? '#0096FF' : '#94a3b8'}
             />

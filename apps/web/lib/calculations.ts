@@ -53,3 +53,14 @@ export function formatTime(timestamp: number): string {
     minute: '2-digit',
   });
 }
+
+/** Returns the logical calendar date accounting for a day boundary hour.
+ *  If it's before `boundaryHour` (default 3 AM), treat as previous calendar day.
+ *  This matches how fitness apps handle late-night logging. */
+export function getLogicalDate(boundaryHour = 3): string {
+  const now = new Date();
+  if (now.getHours() < boundaryHour) {
+    now.setDate(now.getDate() - 1);
+  }
+  return formatDate(now);
+}

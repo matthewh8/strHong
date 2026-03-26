@@ -1,5 +1,4 @@
 'use client';
-import { useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { formatDate } from '@/lib/calculations';
 
@@ -13,7 +12,7 @@ interface Props {
 function buildDateWindow(): { date: Date; key: string }[] {
   const dates = [];
   const today = new Date();
-  for (let i = -7; i <= 7; i++) {
+  for (let i = -3; i <= 3; i++) {
     const d = new Date(today);
     d.setDate(today.getDate() + i);
     dates.push({ date: d, key: formatDate(d) });
@@ -26,25 +25,10 @@ const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'S
 
 export default function RunnaCalendar({ selectedDate, data, dailyGoal, onDateSelect }: Props) {
   const dates = buildDateWindow();
-  const scrollRef = useRef<HTMLDivElement>(null);
   const todayKey = formatDate(new Date());
 
-  // Scroll so today is visible/centered on mount
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const todayIndex = dates.findIndex((d) => d.key === todayKey);
-    const itemWidth = 56; // approx width of each date cell
-    const offset = todayIndex * itemWidth - el.clientWidth / 2 + itemWidth / 2;
-    el.scrollTo({ left: offset, behavior: 'instant' });
-  }, []); // eslint-disable-line
-
   return (
-    <div
-      ref={scrollRef}
-      className="flex gap-1 overflow-x-auto px-4 py-3 scrollable"
-      style={{ scrollbarWidth: 'none' }}
-    >
+    <div className="flex px-2 py-3">
       {dates.map(({ date, key }) => {
         const isSelected = key === selectedDate;
         const isToday = key === todayKey;
@@ -58,7 +42,7 @@ export default function RunnaCalendar({ selectedDate, data, dailyGoal, onDateSel
             key={key}
             onClick={() => onDateSelect(key)}
             whileTap={{ scale: 0.92 }}
-            className="flex flex-col items-center justify-center min-w-[52px] py-2 rounded-xl cursor-pointer select-none"
+            className="flex flex-col items-center justify-center flex-1 py-2 rounded-xl cursor-pointer select-none"
             style={{
               background: isSelected ? 'white' : 'transparent',
             }}
@@ -89,7 +73,7 @@ export default function RunnaCalendar({ selectedDate, data, dailyGoal, onDateSel
               {goalMet && (
                 <div
                   className="w-1.5 h-1.5 rounded-full"
-                  style={{ background: isSelected ? '#3b82f6' : '#3b82f6' }}
+                  style={{ background: '#3b82f6' }}
                 />
               )}
             </div>

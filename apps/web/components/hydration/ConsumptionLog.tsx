@@ -1,5 +1,5 @@
 'use client';
-import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, animate, useTransform } from 'framer-motion';
 import { Trash2 } from 'lucide-react';
 import { formatTime } from '@/lib/calculations';
 import { type HydroLogLocal } from '@/hooks/useHydration';
@@ -11,13 +11,11 @@ interface Props {
 
 function LogEntry({ log, onDelete, isLast }: { log: HydroLogLocal; onDelete: (id: number | string) => void; isLast: boolean }) {
   const x = useMotionValue(0);
+  const deleteOpacity = useTransform(x, [-72, -20], [1, 0]);
 
   const handleDragEnd = () => {
-    if (x.get() < -36) {
-      x.set(-72);
-    } else {
-      x.set(0);
-    }
+    const target = x.get() < -36 ? -72 : 0;
+    animate(x, target, { type: 'spring', stiffness: 400, damping: 40 });
   };
 
   return (
@@ -30,13 +28,13 @@ function LogEntry({ log, onDelete, isLast }: { log: HydroLogLocal; onDelete: (id
       className="relative overflow-hidden"
     >
       {/* Delete zone */}
-      <div
+      <motion.div
         className="absolute top-0 right-0 bottom-0 flex items-center justify-center"
-        style={{ width: 72, background: '#ef4444', cursor: 'pointer' }}
+        style={{ width: 72, background: '#ef4444', cursor: 'pointer', opacity: deleteOpacity }}
         onClick={() => onDelete(log.id!)}
       >
         <Trash2 size={18} color="white" strokeWidth={2} />
-      </div>
+      </motion.div>
 
       {/* Draggable row */}
       <motion.div
@@ -47,10 +45,10 @@ function LogEntry({ log, onDelete, isLast }: { log: HydroLogLocal; onDelete: (id
         onDragEnd={handleDragEnd}
         className="flex items-center justify-between py-3.5 cursor-grab active:cursor-grabbing"
       >
-        <span className="text-sm" style={{ color: '#64748b' }}>
+        <span className="text-sm" style={{ color: '#64748b', pointerEvents: 'none' }}>
           {formatTime(log.timestamp)}
         </span>
-        <span className="text-sm font-semibold" style={{ color: '#f1f5f9' }}>
+        <span className="text-sm font-semibold" style={{ color: '#f1f5f9', pointerEvents: 'none' }}>
           +{log.amount} oz
         </span>
       </motion.div>
