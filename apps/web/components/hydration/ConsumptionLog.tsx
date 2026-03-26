@@ -1,5 +1,6 @@
 'use client';
 import { motion, AnimatePresence, useMotionValue } from 'framer-motion';
+import { Trash2 } from 'lucide-react';
 import { formatTime } from '@/lib/calculations';
 import { type HydroLogLocal } from '@/hooks/useHydration';
 
@@ -31,15 +32,10 @@ function LogEntry({ log, onDelete, isLast }: { log: HydroLogLocal; onDelete: (id
       {/* Delete zone */}
       <div
         className="absolute top-0 right-0 bottom-0 flex items-center justify-center"
-        style={{ width: 72 }}
+        style={{ width: 72, background: '#ef4444', cursor: 'pointer' }}
+        onClick={() => onDelete(log.id!)}
       >
-        <button
-          onClick={() => onDelete(log.id!)}
-          className="text-xs font-semibold"
-          style={{ color: '#ef4444' }}
-        >
-          Delete
-        </button>
+        <Trash2 size={18} color="white" strokeWidth={2} />
       </div>
 
       {/* Draggable row */}

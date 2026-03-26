@@ -7,6 +7,7 @@ import { getProfile, saveProfile, isFirstTimeUser, saveProfileToSupabase, clearP
 import { calcDailyGoal, ageFromBirthday, formatDate } from '@/lib/calculations';
 import { useHydration } from '@/hooks/useHydration';
 import GitHubGrid from '@/components/profile/GitHubGrid';
+import BirthdayPicker from '@/components/ui/BirthdayPicker';
 import { getUser, signOut, deleteAccount } from '@/lib/auth';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -231,14 +232,9 @@ export default function ProfilePage() {
               </div>
 
               {editField === 'birthday' && (
-                <input
-                  type="date"
-                  value={editBirthday}
-                  max={new Date().toISOString().split('T')[0]}
-                  onChange={(e) => setEditBirthday(e.target.value)}
-                  className="w-full rounded-xl px-4 py-3 text-base outline-none mb-5"
-                  style={{ background: '#263347', color: '#f1f5f9', colorScheme: 'dark', border: 'none' }}
-                />
+                <div className="mb-5">
+                  <BirthdayPicker value={editBirthday} onChange={setEditBirthday} />
+                </div>
               )}
 
               {editField === 'height' && (

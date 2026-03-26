@@ -7,6 +7,7 @@ import { saveProfile, setOnboardingComplete, saveProfileToSupabase } from '@/lib
 import { calcDailyGoal, ageFromBirthday } from '@/lib/calculations';
 import { getUser, signOut } from '@/lib/auth';
 import DrumRoller from '@/components/ui/DrumRoller';
+import BirthdayPicker from '@/components/ui/BirthdayPicker';
 
 type Gender = 'male' | 'female';
 type Unit = 'oz' | 'ml';
@@ -375,20 +376,8 @@ function StepAboutYou({
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               style={{ overflow: 'hidden' }}
             >
-              <div className="px-5 pb-3">
-                <input
-                  type="date"
-                  value={birthday}
-                  max={new Date().toISOString().split('T')[0]}
-                  onChange={(e) => onBirthdayChange(e.target.value)}
-                  className="w-full rounded-xl px-4 py-3 text-base font-semibold outline-none"
-                  style={{
-                    background: '#263347',
-                    color: '#f1f5f9',
-                    colorScheme: 'dark',
-                    border: 'none',
-                  }}
-                />
+              <div className="px-4 pb-3">
+                <BirthdayPicker value={birthday} onChange={onBirthdayChange} />
               </div>
               <div className="flex justify-end px-4 pb-3">
                 <button
