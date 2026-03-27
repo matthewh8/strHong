@@ -11,6 +11,8 @@
   --color-accent-dark: #0070cc;
   --color-accent-light: #66c2ff;
   --color-accent-xlight: #cce8ff;
+  --color-supplement: #F59E0B;
+  --color-supplement-bg: rgba(245, 158, 11, 0.08);
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -25,8 +27,6 @@ body {
   height: 100svh;
   max-height: 100svh;
   overflow: hidden;
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
   background: var(--color-background);
   color: var(--color-text);
   font-family: var(--font-sans), system-ui, sans-serif;

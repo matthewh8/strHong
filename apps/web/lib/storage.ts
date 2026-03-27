@@ -64,16 +64,25 @@ function fromSupaShape(row: SupaProfile): UserProfile {
   };
 }
 
+const PROFILE_KEY = 'strHONG_user_profile';
+const LEGACY_PROFILE_KEY = 'hydro_user_profile';
+
 // --- localStorage helpers ---
 
 export function getProfile(): UserProfile | null {
   if (typeof window === 'undefined') return null;
-  const raw = localStorage.getItem('hydro_user_profile');
+  // One-time migration from legacy key
+  const legacy = localStorage.getItem(LEGACY_PROFILE_KEY);
+  if (legacy) {
+    localStorage.setItem(PROFILE_KEY, legacy);
+    localStorage.removeItem(LEGACY_PROFILE_KEY);
+  }
+  const raw = localStorage.getItem(PROFILE_KEY);
   return raw ? JSON.parse(raw) : null;
 }
 
 export function saveProfile(profile: UserProfile): void {
-  localStorage.setItem('hydro_user_profile', JSON.stringify(profile));
+  localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
 }
 
 export function isFirstTimeUser(): boolean {
@@ -86,7 +95,8 @@ export function setOnboardingComplete(): void {
 }
 
 export function clearProfile(): void {
-  localStorage.removeItem('hydro_user_profile');
+  localStorage.removeItem(PROFILE_KEY);
+  localStorage.removeItem(LEGACY_PROFILE_KEY);
   localStorage.removeItem('isFirstTimeUser');
 }
 

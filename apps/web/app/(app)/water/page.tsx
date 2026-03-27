@@ -2,16 +2,16 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getProfile } from '@/lib/storage';
-import { useHydration } from '@/hooks/useHydration';
+import { useWater } from '@/hooks/useWater';
 import { useAuth } from '@/hooks/useAuth';
 import { useNotifications } from '@/hooks/useNotifications';
 import { formatDate } from '@/lib/calculations';
-import RunnaCalendar from '@/components/hydration/RunnaCalendar';
-import TotalDisplay from '@/components/hydration/TotalDisplay';
-import ActionCircles from '@/components/hydration/ActionCircles';
-import ConsumptionLog from '@/components/hydration/ConsumptionLog';
+import RunnaCalendar from '@/components/water/RunnaCalendar';
+import TotalDisplay from '@/components/water/TotalDisplay';
+import ActionCircles from '@/components/water/ActionCircles';
+import ConsumptionLog from '@/components/water/ConsumptionLog';
 
-export default function HydrationPage() {
+export default function WaterPage() {
   const router = useRouter();
   const { user, loading } = useAuth();
   const [profile, setProfile] = useState<ReturnType<typeof getProfile>>(null);
@@ -33,7 +33,7 @@ export default function HydrationPage() {
     handleDeleteLog,
     handleDateChange,
     getDailyTotals,
-  } = useHydration(user?.id);
+  } = useWater(user?.id);
 
   const dailyGoal = profile?.dailyGoal ?? 64;
   const bottleSize = profile?.bottleSize ?? 24;
@@ -78,8 +78,6 @@ export default function HydrationPage() {
       [selectedDate]: total,
     }));
   }, [total, selectedDate]);
-
-  const handlePastDayTap = () => setConfirmModal(true);
 
   const handleConfirmEdit = () => {
     setConfirmModal(false);
@@ -161,11 +159,10 @@ export default function HydrationPage() {
         bottleSize={bottleSize}
         isCurrentDay={isCurrentDay}
         onIncrement={handleActionTap}
-        onPastDayTap={handlePastDayTap}
       />
 
       {/* History divider */}
-      <div className="flex items-center gap-3 px-4 pt-6 pb-2">
+      <div className="flex items-center gap-3 px-4 pt-12 pb-2">
         <div className="flex-1 h-px" style={{ background: 'rgba(51, 65, 85, 0.5)' }} />
         <span className="text-xs font-medium uppercase tracking-widest" style={{ color: '#334155' }}>
           History
@@ -179,12 +176,12 @@ export default function HydrationPage() {
       {/* Past-day confirm modal */}
       {confirmModal && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center"
+          className="fixed inset-0 z-50 flex items-center justify-center px-6"
           style={{ background: 'rgba(0,0,0,0.6)' }}
           onClick={() => setConfirmModal(false)}
         >
           <div
-            className="w-full max-w-[480px] rounded-t-3xl px-6 pt-6 pb-10"
+            className="w-full max-w-[340px] rounded-3xl px-6 pt-6 pb-8"
             style={{ background: '#1e293b' }}
             onClick={(e) => e.stopPropagation()}
           >

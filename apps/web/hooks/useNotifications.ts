@@ -19,6 +19,40 @@ function getMessage(total: number, goal: number, slotIndex: number): string {
   return msgs[slotIndex] ?? msgs[0];
 }
 
+async function registerPushSubscription(): Promise<void> {
+  if (typeof window === 'undefined') return;
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+
+  const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  if (!vapidKey) return;
+
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const existing = await reg.pushManager.getSubscription();
+    if (existing) return; // Already subscribed
+
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(vapidKey),
+    });
+
+    await fetch('/api/push/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subscription: sub }),
+    });
+  } catch {
+    // Service worker not yet active (e.g. dev mode) — silent fail, setTimeout fallback handles it
+  }
+}
+
+function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw = atob(base64);
+  return Uint8Array.from([...raw].map((c) => c.charCodeAt(0))) as Uint8Array<ArrayBuffer>;
+}
+
 export function useNotifications(total: number, goal: number) {
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const totalRef = useRef(total);
@@ -26,9 +60,15 @@ export function useNotifications(total: number, goal: number) {
 
   const requestPermission = async (): Promise<NotificationPermission> => {
     if (!('Notification' in window)) return 'denied';
-    return Notification.requestPermission();
+    const permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+      // Register Web Push subscription for background notifications
+      await registerPushSubscription();
+    }
+    return permission;
   };
 
+  // setTimeout-based fallback — fires while app is open (works in dev too)
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (!('Notification' in window) || Notification.permission !== 'granted') return;
@@ -46,7 +86,7 @@ export function useNotifications(total: number, goal: number) {
         if (totalRef.current >= goal) return;
         new Notification('Hydration Reminder', {
           body: getMessage(totalRef.current, goal, i),
-          icon: '/icon-192.png',
+          icon: '/api/icon?size=192',
         });
       }, ms);
       timersRef.current.push(timer);
@@ -54,6 +94,15 @@ export function useNotifications(total: number, goal: number) {
 
     return () => { timersRef.current.forEach(clearTimeout); };
   }, [goal]);
+
+  // Re-register push subscription if permission was already granted on mount
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!('Notification' in window)) return;
+    if (Notification.permission === 'granted') {
+      registerPushSubscription();
+    }
+  }, []);
 
   return { requestPermission };
 }

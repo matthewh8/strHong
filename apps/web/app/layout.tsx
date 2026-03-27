@@ -11,6 +11,11 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: 'black-translucent',
     title: 'strHong',
+    startupImage: '/api/icon?size=512',
+  },
+  icons: {
+    apple: '/api/icon?size=192',
+    icon: '/api/icon?size=192',
   },
 };
 

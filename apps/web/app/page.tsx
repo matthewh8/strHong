@@ -22,13 +22,13 @@ export default function RootPage() {
           if (profile) {
             saveProfile(profile);
             setOnboardingComplete();
-            router.replace('/hydration');
+            router.replace('/water');
             return;
           }
         }
         router.replace('/onboarding');
       } else {
-        router.replace('/hydration');
+        router.replace('/water');
       }
     });
     return () => subscription.unsubscribe();

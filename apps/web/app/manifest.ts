@@ -11,8 +11,8 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: '#0f172a',
     orientation: 'portrait',
     icons: [
-      { src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
-      { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+      { src: '/api/icon?size=192', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
+      { src: '/api/icon?size=512', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
     ],
     shortcuts: [
       {
@@ -20,7 +20,7 @@ export default function manifest(): MetadataRoute.Manifest {
         short_name: 'Log Water',
         description: 'Quick-log your water intake',
         url: '/widget',
-        icons: [{ src: '/icon-192.png', sizes: '192x192' }],
+        icons: [{ src: '/api/icon?size=192', sizes: '192x192' }],
       },
     ],
   };
