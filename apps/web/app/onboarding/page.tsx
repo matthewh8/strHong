@@ -97,7 +97,7 @@ export default function OnboardingPage() {
       if (user) {
         await saveProfileToSupabase(user.id, profile);
       }
-      router.replace('/hydration');
+      router.replace('/water');
     }
   };
 
@@ -126,18 +126,21 @@ export default function OnboardingPage() {
           {STEP_SUBTITLES[step]}
         </p>
 
-        {/* Step dots */}
+        {/* Step pills */}
         <div className="flex gap-2 mt-5">
           {Array.from({ length: TOTAL_STEPS }, (_, i) => (
             <div
               key={i}
-              className="h-1.5 rounded-full transition-all duration-300"
+              className="flex items-center justify-center rounded-full text-xs font-bold transition-all duration-300"
               style={{
-                width: i === step ? '24px' : '8px',
-                background: i < step ? '#0096FF' : i === step ? '#0096FF' : '#1e293b',
-                opacity: i < step ? 0.4 : 1,
+                width: i === step ? 28 : 24,
+                height: 24,
+                background: i < step ? 'rgba(245,158,11,0.25)' : i === step ? '#F59E0B' : '#1e293b',
+                color: i < step ? '#F59E0B' : i === step ? 'black' : '#334155',
               }}
-            />
+            >
+              {i < step ? '✓' : i + 1}
+            </div>
           ))}
         </div>
       </div>
@@ -208,8 +211,8 @@ export default function OnboardingPage() {
           disabled={!canProceed()}
           className="flex-1 py-4 rounded-2xl font-semibold text-white flex items-center justify-center gap-2"
           style={{
-            background: canProceed() ? '#0096FF' : '#1e293b',
-            color: canProceed() ? 'white' : '#475569',
+            background: canProceed() ? '#F59E0B' : '#1e293b',
+            color: canProceed() ? 'black' : '#475569',
           }}
         >
           {step === TOTAL_STEPS - 1 ? 'Get Started' : 'Next'}
@@ -663,9 +666,9 @@ function StepSupplements({
         whileTap={{ scale: 0.97 }}
         className="w-full py-3 rounded-xl text-sm font-semibold"
         style={{
-          background: allSelected ? 'rgba(0,150,255,0.12)' : '#1e293b',
-          color: allSelected ? '#0096FF' : '#94a3b8',
-          border: `1.5px solid ${allSelected ? '#0096FF' : 'transparent'}`,
+          background: allSelected ? 'rgba(245,158,11,0.12)' : '#1e293b',
+          color: allSelected ? '#F59E0B' : '#94a3b8',
+          border: `1.5px solid ${allSelected ? '#F59E0B' : 'transparent'}`,
         }}
       >
         {allSelected ? 'Deselect All' : 'Select All'}
@@ -680,18 +683,18 @@ function StepSupplements({
             whileTap={{ scale: 0.97 }}
             className="w-full py-5 px-5 rounded-2xl flex items-center gap-4"
             style={{
-              background: selected ? 'rgba(0,150,255,0.1)' : '#1e293b',
-              border: `2px solid ${selected ? '#0096FF' : 'transparent'}`,
+              background: selected ? 'rgba(245,158,11,0.08)' : '#1e293b',
+              border: `2px solid ${selected ? '#F59E0B' : 'transparent'}`,
             }}
           >
             <div
               className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0"
               style={{
-                background: selected ? '#0096FF' : '#263347',
-                border: `1.5px solid ${selected ? '#0096FF' : '#334155'}`,
+                background: selected ? '#F59E0B' : '#263347',
+                border: `1.5px solid ${selected ? '#F59E0B' : '#334155'}`,
               }}
             >
-              {selected && <Check size={14} color="white" strokeWidth={3} />}
+              {selected && <Check size={14} color="black" strokeWidth={3} />}
             </div>
             <div className="text-left">
               <span
@@ -701,7 +704,7 @@ function StepSupplements({
                 {supp.label}
               </span>
               {supp.id === 'creatine' && (
-                <span className="text-xs" style={{ color: selected ? '#0096FF' : '#475569' }}>
+                <span className="text-xs" style={{ color: selected ? '#F59E0B' : '#475569' }}>
                   +16 oz added to daily goal
                 </span>
               )}

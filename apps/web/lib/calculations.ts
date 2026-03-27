@@ -21,6 +21,21 @@ export function calcDailyGoal(
   return Math.round(base * actMultiplier * ageMult + creatineBonus);
 }
 
+/** Creatine maintenance dose in grams, adjusted for weight and age.
+ *  protocol 'standard' = 0.03 g/kg (NSCA consensus), 'elevated' = 0.1 g/kg (cognitive/50+ studies) */
+export function calcCreatineDose(
+  weightKg: number,
+  age: number,
+  protocol: 'standard' | 'elevated' = 'standard'
+): number {
+  if (protocol === 'elevated') {
+    const floor = age >= 50 ? 7 : 5;
+    return Math.max(floor, Math.round(weightKg * 0.1 * 10) / 10);
+  }
+  const floor = age >= 50 ? 5 : 3;
+  return Math.max(floor, Math.round(weightKg * 0.03 * 10) / 10);
+}
+
 /** Convert oz to ml */
 export function ozToMl(oz: number): number {
   return Math.round(oz * 29.5735);

@@ -2,14 +2,14 @@
 import { motion, AnimatePresence, useMotionValue, animate, useTransform } from 'framer-motion';
 import { Trash2 } from 'lucide-react';
 import { formatTime } from '@/lib/calculations';
-import { type HydroLogLocal } from '@/hooks/useHydration';
+import { type WaterLogLocal } from '@/hooks/useWater';
 
 interface Props {
-  logs: HydroLogLocal[];
+  logs: WaterLogLocal[];
   onDelete: (id: number | string) => void;
 }
 
-function LogEntry({ log, onDelete, isLast }: { log: HydroLogLocal; onDelete: (id: number | string) => void; isLast: boolean }) {
+function LogEntry({ log, onDelete, isLast }: { log: WaterLogLocal; onDelete: (id: number | string) => void; isLast: boolean }) {
   const x = useMotionValue(0);
   const deleteOpacity = useTransform(x, [-72, -20], [1, 0]);
 

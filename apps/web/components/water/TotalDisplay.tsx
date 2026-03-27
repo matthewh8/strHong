@@ -12,7 +12,8 @@ interface Props {
 }
 
 export default function TotalDisplay({ total, dailyGoal, canUndo, canRedo, onUndo, onRedo }: Props) {
-  const pct = dailyGoal > 0 ? Math.min(100, (total / dailyGoal)) : 0;
+  const pct = dailyGoal > 0 ? Math.min(1, total / dailyGoal) : 0;
+  const isGoalMet = dailyGoal > 0 && total >= dailyGoal;
 
   const RADIUS = 88;
   const STROKE = 8;
@@ -57,7 +58,7 @@ export default function TotalDisplay({ total, dailyGoal, canUndo, canRedo, onUnd
               cy={CENTER}
               r={RADIUS}
               fill="none"
-              stroke="#3b82f6"
+              stroke={isGoalMet ? '#22c55e' : '#3b82f6'}
               strokeWidth={STROKE}
               strokeLinecap="round"
               strokeDasharray={CIRC}

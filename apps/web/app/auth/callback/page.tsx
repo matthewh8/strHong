@@ -15,7 +15,7 @@ export default function AuthCallbackPage() {
         if (profile) {
           saveProfile(profile);
           setOnboardingComplete();
-          router.replace('/hydration');
+          router.replace('/water');
         } else {
           router.replace('/onboarding');
         }

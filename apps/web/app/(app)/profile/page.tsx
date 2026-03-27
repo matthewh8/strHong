@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, LogOut, X } from 'lucide-react';
 import { getProfile, saveProfile, isFirstTimeUser, saveProfileToSupabase, clearProfile } from '@/lib/storage';
 import { calcDailyGoal, ageFromBirthday, formatDate } from '@/lib/calculations';
-import { useHydration } from '@/hooks/useHydration';
+import { useWater } from '@/hooks/useWater';
 import GitHubGrid from '@/components/profile/GitHubGrid';
 import BirthdayPicker from '@/components/ui/BirthdayPicker';
 import { getUser, signOut, deleteAccount } from '@/lib/auth';
@@ -34,7 +34,7 @@ export default function ProfilePage() {
   const [editBottle, setEditBottle] = useState('');
   const [editUnit, setEditUnit] = useState<'oz' | 'ml'>('oz');
 
-  const { getDailyTotals } = useHydration();
+  const { getDailyTotals } = useWater();
 
   useEffect(() => {
     if (isFirstTimeUser()) router.replace('/onboarding');
@@ -112,7 +112,7 @@ export default function ProfilePage() {
 
   const age = ageFromBirthday(profile.birthday);
   const email = user?.email ?? '';
-  const initials = email ? email.slice(0, 2).toUpperCase() : 'HO';
+  const initials = email ? email.slice(0, 2).toUpperCase() : 'ST';
 
   const editModalTitles: Record<NonNullable<EditField>, string> = {
     birthday: 'Edit Age',
@@ -142,7 +142,7 @@ export default function ProfilePage() {
       <div className="flex flex-col items-center pb-6">
         <div
           className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold"
-          style={{ background: 'rgba(59,130,246,0.2)', color: '#3b82f6' }}
+          style={{ background: 'rgba(245,158,11,0.15)', color: '#F59E0B' }}
         >
           {initials}
         </div>
@@ -168,10 +168,10 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Hydration */}
+        {/* Water */}
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest mb-2 px-1" style={{ color: '#475569' }}>
-            Hydration
+            Water
           </p>
           <div className="rounded-2xl overflow-hidden" style={{ background: '#1e293b' }}>
             <StatRow label="Daily Goal" value={`${profile.dailyGoal} oz`} />
@@ -185,7 +185,7 @@ export default function ProfilePage() {
         {/* Heatmap */}
         <div>
           <p className="text-xs font-semibold uppercase tracking-widest mb-2 px-1" style={{ color: '#475569' }}>
-            Hydration History
+            Water History
           </p>
           <div className="rounded-2xl p-4" style={{ background: '#1e293b' }}>
             <GitHubGrid data={heatmapData} dailyGoal={profile.dailyGoal} weeks={8} />
@@ -286,9 +286,9 @@ export default function ProfilePage() {
                       onClick={() => setEditActivity(lvl)}
                       className="flex items-center px-4 py-3 rounded-xl text-sm font-medium"
                       style={{
-                        background: editActivity === lvl ? 'rgba(59,130,246,0.15)' : '#263347',
-                        color: editActivity === lvl ? '#3b82f6' : '#94a3b8',
-                        border: `1.5px solid ${editActivity === lvl ? '#3b82f6' : 'transparent'}`,
+                        background: editActivity === lvl ? 'rgba(245,158,11,0.12)' : '#263347',
+                        color: editActivity === lvl ? '#F59E0B' : '#94a3b8',
+                        border: `1.5px solid ${editActivity === lvl ? '#F59E0B' : 'transparent'}`,
                       }}
                     >
                       {ACTIVITY_LABELS[lvl]}
@@ -319,9 +319,9 @@ export default function ProfilePage() {
                       onClick={() => setEditUnit(u)}
                       className="flex-1 py-3.5 rounded-xl text-sm font-semibold"
                       style={{
-                        background: editUnit === u ? 'rgba(59,130,246,0.15)' : '#263347',
-                        color: editUnit === u ? '#3b82f6' : '#94a3b8',
-                        border: `1.5px solid ${editUnit === u ? '#3b82f6' : 'transparent'}`,
+                        background: editUnit === u ? 'rgba(245,158,11,0.12)' : '#263347',
+                        color: editUnit === u ? '#F59E0B' : '#94a3b8',
+                        border: `1.5px solid ${editUnit === u ? '#F59E0B' : 'transparent'}`,
                       }}
                     >
                       {u === 'oz' ? 'fl oz' : 'ml'}
@@ -334,7 +334,7 @@ export default function ProfilePage() {
                 onClick={handleSave}
                 disabled={saving}
                 className="w-full py-3.5 rounded-2xl text-sm font-semibold"
-                style={{ background: '#3b82f6', color: 'white' }}
+                style={{ background: '#F59E0B', color: 'black' }}
               >
                 {saving ? 'Saving…' : 'Save'}
               </button>
@@ -367,7 +367,7 @@ export default function ProfilePage() {
                 Delete account?
               </h2>
               <p className="text-sm mb-6" style={{ color: '#64748b' }}>
-                This permanently deletes your account and all hydration data. This cannot be undone.
+                This permanently deletes your account and all strHONG data. This cannot be undone.
               </p>
               <div className="flex gap-3">
                 <button

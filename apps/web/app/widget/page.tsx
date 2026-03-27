@@ -3,12 +3,12 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { getProfile } from '@/lib/storage';
-import { useHydration } from '@/hooks/useHydration';
+import { useWater } from '@/hooks/useWater';
 import { ChevronRight } from 'lucide-react';
 
 export default function WidgetPage() {
   const [profile, setProfile] = useState<ReturnType<typeof getProfile>>(null);
-  const { total, handleIncrement } = useHydration();
+  const { total, handleIncrement } = useWater();
   const [flash, setFlash] = useState<number | null>(null);
 
   useEffect(() => {
@@ -112,7 +112,7 @@ export default function WidgetPage() {
 
       {/* Open app link */}
       <Link
-        href="/hydration"
+        href="/water"
         className="mt-5 flex items-center gap-1 text-sm"
         style={{ color: '#475569' }}
       >

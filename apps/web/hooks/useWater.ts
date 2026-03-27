@@ -1,10 +1,10 @@
 'use client';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { db, type HydroLog, fetchSupaLogs, addSupaLog, deleteSupaLog, fetchSupaDailyTotals } from '@/lib/db';
+import { db, type WaterLog, fetchSupaLogs, addSupaLog, deleteSupaLog, fetchSupaDailyTotals } from '@/lib/db';
 import { getLogicalDate } from '@/lib/calculations';
 
 // Unified local log type that can hold either a Dexie numeric id or a Supabase uuid string
-export interface HydroLogLocal {
+export interface WaterLogLocal {
   id?: string | number;
   date: string;
   amount: number;
@@ -16,13 +16,13 @@ interface HistoryEntry {
   amount: number;
 }
 
-export function useHydration(userId?: string) {
+export function useWater(userId?: string) {
   const today = getLogicalDate();
   const [selectedDate, setSelectedDate] = useState(today);
-  const [logs, setLogs] = useState<HydroLogLocal[]>([]);
+  const [logs, setLogs] = useState<WaterLogLocal[]>([]);
   const [historyStack, setHistoryStack] = useState<HistoryEntry[]>([]);
   const [redoStack, setRedoStack] = useState<HistoryEntry[]>([]);
-  const logCache = useRef<Map<string, HydroLogLocal[]>>(new Map());
+  const logCache = useRef<Map<string, WaterLogLocal[]>>(new Map());
 
   const fetchLogs = useCallback(async (date: string) => {
     const cached = logCache.current.get(date);
@@ -42,8 +42,8 @@ export function useHydration(userId?: string) {
       setLogs(mapped);
     } else {
       const result = await db.logs.where('date').equals(date).sortBy('timestamp');
-      logCache.current.set(date, result as HydroLogLocal[]);
-      setLogs(result as HydroLogLocal[]);
+      logCache.current.set(date, result as WaterLogLocal[]);
+      setLogs(result as WaterLogLocal[]);
     }
   }, [userId]);
 
@@ -58,7 +58,7 @@ export function useHydration(userId?: string) {
     const tempId = `temp-${timestamp}`;
 
     // Optimistic update — instant UI
-    const optimistic: HydroLogLocal = { id: tempId, date: selectedDate, amount, timestamp };
+    const optimistic: WaterLogLocal = { id: tempId, date: selectedDate, amount, timestamp };
     const withOptimistic = [...logs, optimistic];
     setLogs(withOptimistic);
     logCache.current.set(selectedDate, withOptimistic);
@@ -110,7 +110,7 @@ export function useHydration(userId?: string) {
     const tempId = `temp-${timestamp}`;
 
     // Optimistic update — add back to UI immediately
-    const optimistic: HydroLogLocal = { id: tempId, date: selectedDate, amount: entry.amount, timestamp };
+    const optimistic: WaterLogLocal = { id: tempId, date: selectedDate, amount: entry.amount, timestamp };
     setLogs((prev) => {
       const next = [...prev, optimistic];
       logCache.current.set(selectedDate, next);

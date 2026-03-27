@@ -1,7 +1,7 @@
 import Dexie, { type Table } from 'dexie';
 import { supabase } from './supabase';
 
-export interface HydroLog {
+export interface WaterLog {
   id?: number;
   date: string; // YYYY-MM-DD
   amount: number; // oz
@@ -17,18 +17,37 @@ export interface SupaLog {
   logged_at: string; // ISO timestamptz
 }
 
-export class HydroDb extends Dexie {
-  logs!: Table<HydroLog>;
+export interface SupplementLog {
+  id?: number;
+  supplement_id: string;
+  date: string;       // YYYY-MM-DD
+  taken_at: string;   // ISO timestamp
+  user_id?: string;
+}
+
+// Shape of a supplement_logs row returned from Supabase
+export interface SupaSupplementLog {
+  id: string;
+  user_id: string;
+  supplement_id: string;
+  date: string;
+  taken_at: string;
+}
+
+export class WaterDb extends Dexie {
+  logs!: Table<WaterLog>;
+  supplementLogs!: Table<SupplementLog>;
 
   constructor() {
-    super('HydroDb');
+    super('strHONGDb');
     this.version(1).stores({
       logs: '++id, date, timestamp',
+      supplementLogs: '++id, date, supplement_id',
     });
   }
 }
 
-export const db = new HydroDb();
+export const db = new WaterDb();
 
 export async function clearAllLogs(): Promise<void> {
   await db.logs.clear();
@@ -88,4 +107,45 @@ export async function fetchSupaDailyTotals(
     totals[row.date] = (totals[row.date] ?? 0) + Number(row.amount);
   }
   return totals;
+}
+
+// --- Supabase supplement_logs helpers ---
+
+export async function fetchSupaSupplementLogs(
+  userId: string,
+  date: string
+): Promise<SupaSupplementLog[]> {
+  const { data, error } = await supabase
+    .from('supplement_logs')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('date', date);
+  if (error) {
+    // Table may not exist yet — return empty gracefully
+    console.warn('supplement_logs fetch error:', error.message);
+    return [];
+  }
+  return (data ?? []) as SupaSupplementLog[];
+}
+
+export async function addSupaSupplementLog(
+  userId: string,
+  supplementId: string,
+  date: string
+): Promise<SupaSupplementLog | null> {
+  const { data, error } = await supabase
+    .from('supplement_logs')
+    .insert({ user_id: userId, supplement_id: supplementId, date, taken_at: new Date().toISOString() })
+    .select()
+    .single();
+  if (error) {
+    console.warn('supplement_logs insert error:', error.message);
+    return null;
+  }
+  return data as SupaSupplementLog;
+}
+
+export async function deleteSupaSupplementLog(id: string): Promise<void> {
+  const { error } = await supabase.from('supplement_logs').delete().eq('id', id);
+  if (error) console.warn('supplement_logs delete error:', error.message);
 }

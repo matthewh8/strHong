@@ -2,16 +2,16 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getProfile } from '@/lib/storage';
-import { useHydration } from '@/hooks/useHydration';
+import { useWater } from '@/hooks/useWater';
 import { useAuth } from '@/hooks/useAuth';
 import { useNotifications } from '@/hooks/useNotifications';
 import { formatDate } from '@/lib/calculations';
-import RunnaCalendar from '@/components/hydration/RunnaCalendar';
-import TotalDisplay from '@/components/hydration/TotalDisplay';
-import ActionCircles from '@/components/hydration/ActionCircles';
-import ConsumptionLog from '@/components/hydration/ConsumptionLog';
+import RunnaCalendar from '@/components/water/RunnaCalendar';
+import TotalDisplay from '@/components/water/TotalDisplay';
+import ActionCircles from '@/components/water/ActionCircles';
+import ConsumptionLog from '@/components/water/ConsumptionLog';
 
-export default function HydrationPage() {
+export default function WaterPage() {
   const router = useRouter();
   const { user, loading } = useAuth();
   const [profile, setProfile] = useState<ReturnType<typeof getProfile>>(null);
@@ -33,7 +33,7 @@ export default function HydrationPage() {
     handleDeleteLog,
     handleDateChange,
     getDailyTotals,
-  } = useHydration(user?.id);
+  } = useWater(user?.id);
 
   const dailyGoal = profile?.dailyGoal ?? 64;
   const bottleSize = profile?.bottleSize ?? 24;

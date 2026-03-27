@@ -47,7 +47,7 @@ export default function LoginPage() {
       setMode('idle');
     } else {
       sessionStorage.setItem('guestActive', '1');
-      router.replace(isFirstTimeUser() ? '/onboarding' : '/hydration');
+      router.replace(isFirstTimeUser() ? '/onboarding' : '/water');
     }
   };
 
@@ -68,7 +68,7 @@ export default function LoginPage() {
           strHONG
         </h1>
         <p className="text-sm text-center" style={{ color: '#64748b' }}>
-          Track your hydration. Hit your goals.
+          Track your health. Hit your goals.
         </p>
       </div>
 
