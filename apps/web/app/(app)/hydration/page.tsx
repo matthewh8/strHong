@@ -79,8 +79,6 @@ export default function HydrationPage() {
     }));
   }, [total, selectedDate]);
 
-  const handlePastDayTap = () => setConfirmModal(true);
-
   const handleConfirmEdit = () => {
     setConfirmModal(false);
     if (pendingAmount !== null) {
@@ -161,7 +159,6 @@ export default function HydrationPage() {
         bottleSize={bottleSize}
         isCurrentDay={isCurrentDay}
         onIncrement={handleActionTap}
-        onPastDayTap={handlePastDayTap}
       />
 
       {/* History divider */}
@@ -179,12 +176,12 @@ export default function HydrationPage() {
       {/* Past-day confirm modal */}
       {confirmModal && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center"
+          className="fixed inset-0 z-50 flex items-center justify-center px-6"
           style={{ background: 'rgba(0,0,0,0.6)' }}
           onClick={() => setConfirmModal(false)}
         >
           <div
-            className="w-full max-w-[480px] rounded-t-3xl px-6 pt-6 pb-10"
+            className="w-full max-w-[340px] rounded-3xl px-6 pt-6 pb-8"
             style={{ background: '#1e293b' }}
             onClick={(e) => e.stopPropagation()}
           >

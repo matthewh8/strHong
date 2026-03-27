@@ -5,23 +5,14 @@ interface Props {
   bottleSize: number; // oz
   isCurrentDay: boolean;
   onIncrement: (amount: number) => void;
-  onPastDayTap?: () => void;
 }
 
-export default function ActionCircles({ bottleSize, isCurrentDay, onIncrement, onPastDayTap }: Props) {
+export default function ActionCircles({ bottleSize, isCurrentDay, onIncrement }: Props) {
   const actions = [
     { label: '+1', amount: 1 },
     { label: `+${Math.round(bottleSize / 2)}`, amount: Math.round(bottleSize / 2) },
     { label: `+${bottleSize}`, amount: bottleSize },
   ];
-
-  const handleTap = (amount: number) => {
-    if (!isCurrentDay && onPastDayTap) {
-      onPastDayTap();
-      return;
-    }
-    onIncrement(amount);
-  };
 
   return (
     <div
@@ -31,10 +22,10 @@ export default function ActionCircles({ bottleSize, isCurrentDay, onIncrement, o
       {actions.map(({ label, amount }) => (
         <motion.button
           key={label}
-          onClick={() => handleTap(amount)}
+          onClick={() => onIncrement(amount)}
           whileTap={{ scale: 0.88 }}
           transition={{ type: 'spring', stiffness: 600, damping: 20 }}
-          className="flex flex-col items-center justify-center w-20 h-20 rounded-full text-sm font-semibold select-none"
+          className="flex flex-col items-center justify-center w-24 h-24 rounded-full text-sm font-semibold select-none"
           style={{
             border: '1.5px solid rgba(241, 245, 249, 0.6)',
             color: '#f1f5f9',

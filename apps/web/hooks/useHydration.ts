@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { db, type HydroLog, fetchSupaLogs, addSupaLog, deleteSupaLog, fetchSupaDailyTotals } from '@/lib/db';
 import { getLogicalDate } from '@/lib/calculations';
 
@@ -22,20 +22,27 @@ export function useHydration(userId?: string) {
   const [logs, setLogs] = useState<HydroLogLocal[]>([]);
   const [historyStack, setHistoryStack] = useState<HistoryEntry[]>([]);
   const [redoStack, setRedoStack] = useState<HistoryEntry[]>([]);
+  const logCache = useRef<Map<string, HydroLogLocal[]>>(new Map());
 
   const fetchLogs = useCallback(async (date: string) => {
+    const cached = logCache.current.get(date);
+    if (cached) {
+      setLogs(cached);
+      return;
+    }
     if (userId) {
       const rows = await fetchSupaLogs(userId, date);
-      setLogs(
-        rows.map((r) => ({
-          id: r.id,
-          date: r.date,
-          amount: Number(r.amount),
-          timestamp: new Date(r.logged_at).getTime(),
-        }))
-      );
+      const mapped = rows.map((r) => ({
+        id: r.id,
+        date: r.date,
+        amount: Number(r.amount),
+        timestamp: new Date(r.logged_at).getTime(),
+      }));
+      logCache.current.set(date, mapped);
+      setLogs(mapped);
     } else {
       const result = await db.logs.where('date').equals(date).sortBy('timestamp');
+      logCache.current.set(date, result as HydroLogLocal[]);
       setLogs(result as HydroLogLocal[]);
     }
   }, [userId]);
@@ -52,18 +59,28 @@ export function useHydration(userId?: string) {
 
     // Optimistic update — instant UI
     const optimistic: HydroLogLocal = { id: tempId, date: selectedDate, amount, timestamp };
-    setLogs((prev) => [...prev, optimistic]);
+    const withOptimistic = [...logs, optimistic];
+    setLogs(withOptimistic);
+    logCache.current.set(selectedDate, withOptimistic);
     setHistoryStack((prev) => [...prev, { id: tempId, amount }]);
     setRedoStack([]);
 
     if (userId) {
       const row = await addSupaLog(userId, selectedDate, amount, timestamp);
       // Swap temp entry for real one with DB-assigned UUID
-      setLogs((prev) => prev.map((l) => l.id === tempId ? { ...l, id: row.id } : l));
+      setLogs((prev) => {
+        const next = prev.map((l) => l.id === tempId ? { ...l, id: row.id } : l);
+        logCache.current.set(selectedDate, next);
+        return next;
+      });
       setHistoryStack((prev) => prev.map((e) => e.id === tempId ? { ...e, id: row.id } : e));
     } else {
       const id = await db.logs.add({ date: selectedDate, amount, timestamp });
-      setLogs((prev) => prev.map((l) => l.id === tempId ? { ...l, id: id as number } : l));
+      setLogs((prev) => {
+        const next = prev.map((l) => l.id === tempId ? { ...l, id: id as number } : l);
+        logCache.current.set(selectedDate, next);
+        return next;
+      });
       setHistoryStack((prev) => prev.map((e) => e.id === tempId ? { ...e, id: id as number } : e));
     }
   };
@@ -72,7 +89,11 @@ export function useHydration(userId?: string) {
     if (historyStack.length === 0) return;
     const last = historyStack[historyStack.length - 1];
     // Optimistic update — remove from UI immediately
-    setLogs((prev) => prev.filter((l) => l.id !== last.id));
+    setLogs((prev) => {
+      const next = prev.filter((l) => l.id !== last.id);
+      logCache.current.set(selectedDate, next);
+      return next;
+    });
     setHistoryStack((prev) => prev.slice(0, -1));
     setRedoStack((prev) => [...prev, last]);
     if (userId) {
@@ -90,24 +111,40 @@ export function useHydration(userId?: string) {
 
     // Optimistic update — add back to UI immediately
     const optimistic: HydroLogLocal = { id: tempId, date: selectedDate, amount: entry.amount, timestamp };
-    setLogs((prev) => [...prev, optimistic]);
+    setLogs((prev) => {
+      const next = [...prev, optimistic];
+      logCache.current.set(selectedDate, next);
+      return next;
+    });
     setRedoStack((prev) => prev.slice(0, -1));
     setHistoryStack((prev) => [...prev, { id: tempId, amount: entry.amount }]);
 
     if (userId) {
       const row = await addSupaLog(userId, selectedDate, entry.amount, timestamp);
-      setLogs((prev) => prev.map((l) => l.id === tempId ? { ...l, id: row.id } : l));
+      setLogs((prev) => {
+        const next = prev.map((l) => l.id === tempId ? { ...l, id: row.id } : l);
+        logCache.current.set(selectedDate, next);
+        return next;
+      });
       setHistoryStack((prev) => prev.map((e) => e.id === tempId ? { ...e, id: row.id } : e));
     } else {
       const newId = await db.logs.add({ date: selectedDate, amount: entry.amount, timestamp });
-      setLogs((prev) => prev.map((l) => l.id === tempId ? { ...l, id: newId as number } : l));
+      setLogs((prev) => {
+        const next = prev.map((l) => l.id === tempId ? { ...l, id: newId as number } : l);
+        logCache.current.set(selectedDate, next);
+        return next;
+      });
       setHistoryStack((prev) => prev.map((e) => e.id === tempId ? { ...e, id: newId as number } : e));
     }
   };
 
   const handleDeleteLog = async (id: string | number) => {
     // Optimistic update — remove from UI immediately
-    setLogs((prev) => prev.filter((l) => l.id !== id));
+    setLogs((prev) => {
+      const next = prev.filter((l) => l.id !== id);
+      logCache.current.set(selectedDate, next);
+      return next;
+    });
     setHistoryStack((prev) => prev.filter((e) => e.id !== id));
     if (userId) {
       await deleteSupaLog(id as string);
