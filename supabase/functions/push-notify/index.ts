@@ -81,8 +81,8 @@ Deno.serve(async (_req) => {
       const goal   = goalByUser[sub.user_id] ?? 64;
       const lastLog = lastLogByUser[sub.user_id] ?? null;
 
-      // Skip if goal already met
-      if (total >= goal) return;
+      // Skip if within 5 oz of goal or already over
+      if (total >= goal - 5) return;
 
       // Skip if logged water within the last 3 hours
       if (lastLog && new Date(lastLog).getTime() > Date.now() - THREE_HOURS_MS) return;
