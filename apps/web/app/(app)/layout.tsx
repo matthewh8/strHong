@@ -35,7 +35,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex flex-col h-svh max-w-[480px] mx-auto relative" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
-      <main className="flex-1 overflow-y-auto">{children}</main>
+      <main className="flex-1 overflow-y-auto pb-[80px]" style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom))' }}>{children}</main>
       <BottomNav />
     </div>
   );

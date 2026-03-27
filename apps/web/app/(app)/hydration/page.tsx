@@ -162,7 +162,7 @@ export default function HydrationPage() {
       />
 
       {/* History divider */}
-      <div className="flex items-center gap-3 px-4 pt-6 pb-2">
+      <div className="flex items-center gap-3 px-4 pt-12 pb-2">
         <div className="flex-1 h-px" style={{ background: 'rgba(51, 65, 85, 0.5)' }} />
         <span className="text-xs font-medium uppercase tracking-widest" style={{ color: '#334155' }}>
           History
