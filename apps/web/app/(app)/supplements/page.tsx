@@ -27,7 +27,7 @@ const AMBER_BORDER = 'rgba(245, 158, 11, 0.3)';
 
 export default function SupplementsPage() {
   const { user } = useAuth();
-  const [profile, setProfile] = useState(getProfile());
+  const [profile, setProfile] = useState<ReturnType<typeof getProfile>>(null);
   const [supplementIds, setSupplementIds] = useState<string[]>(profile?.supplements ?? []);
   const [calendarData, setCalendarData] = useState<Record<string, number>>({});
 
@@ -109,7 +109,12 @@ export default function SupplementsPage() {
     saveProfile(updated);
     setProfile(updated);
     const authUser = await getUser();
-    if (authUser) await saveProfileToSupabase(authUser.id, updated);
+    if (authUser) {
+      const { error } = await saveProfileToSupabase(authUser.id, updated);
+      if (error) {
+        console.error('Supplement list sync failed:', error);
+      }
+    }
     setSaving(false);
   };
 

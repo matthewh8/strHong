@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
-import { db, type SupplementLog, fetchSupaSupplementLogs, addSupaSupplementLog, deleteSupaSupplementLog } from '@/lib/db';
+import { db, type SupplementLog, fetchSupaSupplementLogs, addSupaSupplementLog, deleteSupaSupplementLog, fetchSupaDailySupplementCounts } from '@/lib/db';
 import { getLogicalDate } from '@/lib/calculations';
 
 export interface SupplementConfig {
@@ -100,6 +100,11 @@ export function useSupplements(supplementIds: string[], userId?: string) {
         if (row) {
           setLogMap((prev) => ({ ...prev, [supplementId]: row.id }));
           setUndoQueue((prev) => prev.map((e) => e.supplementId === supplementId ? { ...e, logId: row.id } : e));
+        } else {
+          // Insert failed — revert optimistic update
+          setTakenIds((prev) => { const n = new Set(prev); n.delete(supplementId); return n; });
+          setLogMap((prev) => { const n = { ...prev }; delete n[supplementId]; return n; });
+          setUndoQueue((prev) => prev.filter((e) => e.supplementId !== supplementId));
         }
       } else {
         const id = await db.supplementLogs.add({
@@ -122,8 +127,7 @@ export function useSupplements(supplementIds: string[], userId?: string) {
   const getDailyTakenCounts = useCallback(async (dates: string[]): Promise<Record<string, number>> => {
     if (dates.length === 0) return {};
     if (userId) {
-      // Could query Supabase here; for now return empty to avoid extra round-trips
-      return {};
+      return fetchSupaDailySupplementCounts(userId, dates);
     }
     const allLogs = await db.supplementLogs.where('date').anyOf(dates).toArray();
     const counts: Record<string, number> = {};

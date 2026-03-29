@@ -95,7 +95,8 @@ export default function OnboardingPage() {
       // Persist to Supabase if logged in
       const user = await getUser();
       if (user) {
-        await saveProfileToSupabase(user.id, profile);
+        const { error } = await saveProfileToSupabase(user.id, profile);
+        if (error) console.error('Onboarding profile sync failed:', error);
       }
       router.replace('/water');
     }

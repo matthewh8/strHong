@@ -149,3 +149,24 @@ export async function deleteSupaSupplementLog(id: string): Promise<void> {
   const { error } = await supabase.from('supplement_logs').delete().eq('id', id);
   if (error) console.warn('supplement_logs delete error:', error.message);
 }
+
+export async function fetchSupaDailySupplementCounts(
+  userId: string,
+  dates: string[]
+): Promise<Record<string, number>> {
+  if (dates.length === 0) return {};
+  const { data, error } = await supabase
+    .from('supplement_logs')
+    .select('date')
+    .eq('user_id', userId)
+    .in('date', dates);
+  if (error) {
+    console.warn('supplement_logs counts fetch error:', error.message);
+    return {};
+  }
+  const counts: Record<string, number> = {};
+  for (const row of data ?? []) {
+    counts[row.date] = (counts[row.date] ?? 0) + 1;
+  }
+  return counts;
+}

@@ -18,7 +18,12 @@ type EditField = 'birthday' | 'height' | 'weight' | 'activityLevel' | 'bottleSiz
 export default function ProfilePage() {
   const router = useRouter();
   const { user } = useAuth();
-  const [profile, setProfile] = useState(getProfile());
+  const [profile, setProfile] = useState<ReturnType<typeof getProfile>>(null);
+
+  // Load profile client-side only (avoids SSR/client hydration mismatch)
+  useEffect(() => {
+    setProfile(getProfile());
+  }, []);
   const [heatmapData, setHeatmapData] = useState<Record<string, number>>({});
   const [editField, setEditField] = useState<EditField>(null);
   const [saving, setSaving] = useState(false);
@@ -87,7 +92,12 @@ export default function ProfilePage() {
     setProfile(updated);
 
     const authUser = await getUser();
-    if (authUser) await saveProfileToSupabase(authUser.id, updated);
+    if (authUser) {
+      const { error } = await saveProfileToSupabase(authUser.id, updated);
+      if (error) {
+        console.error('Profile sync failed:', error);
+      }
+    }
 
     setSaving(false);
     setEditField(null);
